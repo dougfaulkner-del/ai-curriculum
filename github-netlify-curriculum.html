@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Git & Netlify">
+  <title>GitHub & Netlify Primer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: #f2f2f7;
+      color: #1c1c1e;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    #home { display: block; }
+    #lesson-view { display: none; }
+
+    /* ── HEADER ── */
+    .header {
+      background: #fff;
+      padding: 16px 20px 0;
+      border-bottom: 1px solid #e5e5ea;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .header-meta {
+      font-size: 13px;
+      color: #8e8e93;
+      margin-top: 2px;
+    }
+    .total-badge {
+      background: #1c1c1e;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      margin-top: 4px;
+    }
+
+    /* progress ring area */
+    .progress-strip {
+      display: flex;
+      gap: 3px;
+      padding: 14px 0 16px;
+    }
+    .progress-seg {
+      flex: 1;
+      height: 4px;
+      background: #e5e5ea;
+      border-radius: 2px;
+      transition: background 0.3s;
+    }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      padding: 22px 20px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .section-meta {
+      font-size: 13px;
+      color: #8e8e93;
+    }
+    .section-sub {
+      padding: 0 20px 10px;
+      font-size: 13px;
+      color: #8e8e93;
+    }
+
+    /* ── LESSON CARDS ── */
+    .lessons-group {
+      background: #fff;
+      border-radius: 16px;
+      margin: 0 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .lesson-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      gap: 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #f2f2f7;
+      transition: background 0.15s;
+    }
+    .lesson-row:last-child { border-bottom: none; }
+    .lesson-row:active { background: #f2f2f7; }
+    .lesson-row.done { background: #f9f9f9; }
+
+    .lesson-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .lesson-info { flex: 1; min-width: 0; }
+    .lesson-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1c1c1e;
+      margin-bottom: 2px;
+    }
+    .lesson-title.done {
+      color: #8e8e93;
+      text-decoration: line-through;
+    }
+    .lesson-sub {
+      font-size: 12px;
+      color: #8e8e93;
+    }
+    .lesson-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .lesson-dur {
+      font-size: 13px;
+      font-weight: 500;
+      color: #3c3c43;
+    }
+    .checkmark {
+      font-size: 16px;
+      color: #e5e5ea;
+    }
+    .checkmark.done { color: #30d158; }
+
+    .footer { height: 40px; }
+
+    /* ── LESSON VIEW ── */
+    .lv-header {
+      background: #fff;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e5ea;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: #007aff;
+      font-size: 16px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .lv-header-text { flex: 1; min-width: 0; }
+    .lv-unit-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #8e8e93;
+      margin-bottom: 2px;
+    }
+    .lv-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lesson-wrap {
+      padding: 20px;
+    }
+
+    /* stats row like workout app */
+    .stats-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8e8e93;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .copy-btn {
+      width: 100%;
+      background: #1c1c1e;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.2px;
+      margin-bottom: 20px;
+      transition: all 0.2s;
+    }
+    .copy-btn.copied {
+      background: #30d158;
+      color: #fff;
+    }
+
+    .lesson-body {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #3c3c43;
+      white-space: pre-wrap;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+      margin-bottom: 20px;
+    }
+
+    .nav-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .nav-btn {
+      flex: 1;
+      background: #fff;
+      border: 1.5px solid #e5e5ea;
+      color: #1c1c1e;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .complete-btn {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid #e5e5ea;
+      color: #1c1c1e;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .complete-btn.done {
+      background: #30d158;
+      border-color: #30d158;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <h1>Git &amp; Netlify</h1>
+        <div class="header-meta">Primer Curriculum</div>
+      </div>
+      <div class="total-badge" id="progress-badge">0 / 12</div>
+    </div>
+    <div class="progress-strip" id="progress-bar"></div>
+  </div>
+  <div id="units-container"></div>
+  <div class="footer"></div>
+</div>
+
+<!-- LESSON VIEW -->
+<div id="lesson-view">
+  <div class="lv-header">
+    <button class="back-btn" onclick="goHome()">&#8249; Back</button>
+    <div class="lv-header-text">
+      <div class="lv-unit-label" id="lv-label"></div>
+      <div class="lv-title" id="lv-title"></div>
+    </div>
+  </div>
+  <div class="lesson-wrap">
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-label">Unit</div>
+        <div class="stat-value" id="lv-unit-num">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Read Time</div>
+        <div class="stat-value" id="lv-dur">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Progress</div>
+        <div class="stat-value" id="lv-progress">—</div>
+      </div>
+    </div>
+    <button class="copy-btn" id="copy-btn" onclick="copyLesson()">Copy for Speechify</button>
+    <div class="lesson-body" id="lv-body"></div>
+    <div class="nav-row">
+      <button class="nav-btn" id="prev-btn" onclick="goPrev()">← Prev</button>
+      <button class="nav-btn" id="next-btn" onclick="goNext()">Next →</button>
+    </div>
+    <button class="complete-btn" id="complete-btn" onclick="toggleComplete()">Mark Complete</button>
+  </div>
+</div>
+
+<script>
+const curriculum = [
+  {
+    unit: "UNIT 1",
+    title: "What GitHub Actually Is",
+    subtitle: "The mental model behind the tool",
+    accent: "#007aff",
+    emoji: "📁",
+    lessons: [
+      {
+        id: "1.1",
+        title: "Files, Folders, and Repositories",
+        duration: "8 min",
+        sub: "The basic building blocks",
+        body: `When you save a Word document on your computer, it exists in one place — your hard drive. If you delete it, it's gone. If you want to share it, you email it. If two people edit it at the same time, you end up with two different versions and no clear way to reconcile them. This is the problem GitHub was built to solve.
+
+GitHub is a website that stores code files — but it does so in a way that tracks every change ever made to them, by whom, and when. The core unit is called a repository, usually shortened to repo. Think of a repository as a project folder that remembers its entire history. Every version of every file you've ever saved is accessible, not just the most recent one.
+
+When you created a repository for your curriculum app, you were creating one of these project folders on GitHub's servers. The files inside it — your HTML file — are stored there permanently and accessible from any device with a browser.
+
+The word "Git" refers to the underlying software that handles the version tracking. GitHub is a company that built a website on top of Git, making it usable without technical expertise. When people say "push to GitHub," they mean saving their local changes up to that website. When they say "pull from GitHub," they mean downloading the latest version to their computer.
+
+For your current use case — storing one HTML file and serving it as a website — you're using about five percent of what GitHub can do. That's fine. But understanding the full picture helps you make sense of the terminology you'll encounter and gives you a foundation to build on if you want to go further.
+
+Exercise: go to your GitHub repository and click on your HTML file. Then click the "History" button (or clock icon). You'll see every time you've saved changes to that file. Each entry is called a commit. This is your file's complete timeline.`
+      },
+      {
+        id: "1.2",
+        title: "Commits — Saving with a Message",
+        duration: "9 min",
+        sub: "Why every save has a description",
+        body: `Every time you save a change to a file on GitHub, you're creating something called a commit. A commit is not just a save — it's a save plus a message describing what changed and why. That combination is what makes GitHub's history useful rather than just a list of file versions.
+
+When you uploaded your curriculum HTML file and typed something in the message box before hitting "Commit changes," you created your first commit. The message you wrote — even if it was just "add curriculum" — is permanently attached to that version of the file. Anyone looking at the history can see what changed in each save and why.
+
+This matters for a few reasons. First, it means you can always go back. If you update your curriculum, break something, and can't figure out what went wrong, you can look at the commit history, find the last version that worked, and restore it. Second, it creates accountability and context. Six months from now, if you look back at a change, the commit message tells you what you were thinking at the time. Third, it's how collaboration works at scale — when ten developers are working on the same codebase, commits with clear messages are how everyone understands what each person changed and why.
+
+Good commit messages are specific. "update" tells you nothing. "add unit 3 lessons and fix copy button color" tells you exactly what happened. It takes five extra seconds and saves significant confusion later.
+
+For your curriculum project, a reasonable commit practice is: every time you make a meaningful change — new content, layout fix, new feature — commit it with a one-sentence description of what changed. You'll thank yourself when you need to find an earlier version.
+
+Exercise: make a small edit to your HTML file on GitHub — even just a single word change — and write a specific commit message describing it. Then go to the file's history and confirm you can see both commits with their messages.`
+      },
+      {
+        id: "1.3",
+        title: "Branches — Working Without Breaking Things",
+        duration: "10 min",
+        sub: "The safety net for making changes",
+        body: `So far everything you've done on GitHub has been on the main branch. A branch is a parallel version of your repository where you can make changes without affecting the live version. Think of it as a draft — you work on it, test it, and only when you're satisfied do you merge it back into the main version.
+
+Here's why this matters in practice. Right now your main branch is what GitHub Pages serves as your live website. If you edit a file directly on main and accidentally break something, your live site is broken immediately. Branches solve this by letting you make changes in isolation first.
+
+The workflow looks like this: you create a new branch — call it "add-unit-3" — make your changes there, check that everything looks right, then merge that branch back into main. At that point your live site updates with the new content, and you've never had a broken live version.
+
+For a solo project like yours, branches are optional — most people working alone edit main directly and accept the occasional broken state. But understanding branches is important for two reasons. First, it's the vocabulary you'll encounter constantly when reading GitHub documentation or tutorials. Second, as your project gets more complex, branches become the safe way to experiment.
+
+The key terms to know: main (or sometimes master) is the primary branch, usually what's live. A feature branch is any branch you create for a specific piece of work. Merging is the act of combining a feature branch back into main. A pull request is a formal way to propose a merge — it lets you or others review the changes before they go live.
+
+Exercise: look at your repository on GitHub. Find the branch selector (it's a dropdown near the top left of the file list, probably showing "main"). Tap it and look at the option to create a new branch. You don't need to create one — just observe where it is and what the interface looks like.`
+      }
+    ]
+  },
+  {
+    unit: "UNIT 2",
+    title: "GitHub Pages",
+    subtitle: "Turning a repository into a live website",
+    accent: "#30d158",
+    emoji: "🌐",
+    lessons: [
+      {
+        id: "2.1",
+        title: "How GitHub Pages Works",
+        duration: "7 min",
+        sub: "From file to live URL",
+        body: `GitHub Pages is a feature that takes files in your repository and serves them as a public website — for free, permanently, with no server to manage. It's one of the most useful things GitHub offers for someone in your position: you have an HTML file you want to access from anywhere, and GitHub Pages turns that into a URL.
+
+The way it works is straightforward. When you enable GitHub Pages on a repository, GitHub looks at the files in your main branch and serves them at a URL that follows the pattern: yourusername.github.io/repository-name. Any HTML file in that repository becomes a web page accessible at a corresponding URL.
+
+This is fundamentally different from, say, emailing yourself an HTML file and opening it locally. When you open an HTML file on your phone directly, it runs in isolation — no URL, no shareable link, can't be bookmarked reliably. GitHub Pages gives it a stable address that works on any device, in any browser, without you having to do anything after the initial setup.
+
+The index.html convention is worth knowing: if you have a file named exactly index.html in your repository, GitHub Pages will serve it automatically when someone visits your base URL without specifying a file name. That's why typing yourusername.github.io/repository-name works without needing to add /filename.html at the end. If your file has any other name, you need the full path.
+
+For your curriculum, renaming the file to index.html would make the URL cleaner. Instead of github.io/ai-curriculum/ai-curriculum.html, you'd just visit github.io/ai-curriculum. It's a one-step rename on GitHub.
+
+Exercise: go to your repository settings, find the Pages section, and confirm it's enabled and pointing to your main branch. Note the URL it's serving. Then try opening that URL on a different device — your computer if you're on your phone, or vice versa — and confirm it loads.`
+      },
+      {
+        id: "2.2",
+        title: "Updating Your Live Site",
+        duration: "8 min",
+        sub: "The edit, commit, wait cycle",
+        body: `Once GitHub Pages is set up, updating your live site is a three-step cycle: edit the file, commit the change, wait about sixty seconds. That's it. GitHub detects the commit, rebuilds the site, and your live URL reflects the new version automatically.
+
+This is called continuous deployment — every commit to your main branch triggers a new deployment. You don't have to push a button, run a command, or notify anyone. The system handles it.
+
+The sixty-second wait is real and worth knowing about. New developers frequently edit a file, commit, immediately check the live URL, see the old version, and assume something broke. Nothing broke — the deployment just hasn't finished yet. GitHub shows you the deployment status in the Actions tab of your repository. A spinning indicator means it's building; a green checkmark means it's live.
+
+When you update your curriculum with new units or lessons, the process will be: open the HTML file on GitHub, click the edit button (pencil icon), make your changes, write a commit message, commit to main. About a minute later, your home screen app at that URL will serve the updated version automatically. No re-adding to home screen, no new URL — the bookmark you already have just works with the new content.
+
+One practical note: your browser or phone might cache the old version even after the deployment finishes. If you update your site and still see the old version, try a hard refresh — on Safari, close the tab completely and reopen the URL. That forces it to fetch the latest version rather than the cached one.
+
+Exercise: make a visible change to your HTML file — even just the page title — commit it, then watch the Actions tab until you see a green checkmark. Then open your live URL and confirm the change is there.`
+      },
+      {
+        id: "2.3",
+        title: "Custom Domains (Optional)",
+        duration: "6 min",
+        sub: "Making your URL yours",
+        body: `Your GitHub Pages URL right now is something like yourusername.github.io/ai-curriculum. That works perfectly well and is completely free. But if you ever want a cleaner URL — something like curriculum.yourname.com — GitHub Pages supports custom domains at no cost on their end. You'd just pay for the domain itself, typically ten to fifteen dollars per year.
+
+The process has two parts. First you buy a domain from a registrar — Namecheap, Google Domains, and Cloudflare are common choices. Then you configure two things: a DNS record at your registrar pointing your domain to GitHub's servers, and a CNAME file in your repository telling GitHub which domain to respond to. GitHub's documentation walks through this clearly and it takes about fifteen minutes once you have a domain.
+
+For your current use case this is almost certainly not worth doing. Your GitHub Pages URL is stable, permanent, and free. The only reason to add a custom domain would be if you wanted to share the curriculum with others under a polished URL, or if you started building more projects and wanted them all under a single domain you control.
+
+What is worth understanding conceptually is how DNS works, because it demystifies a lot of what feels like magic. DNS stands for Domain Name System. It's essentially a global directory that translates human-readable domain names — like google.com — into the numerical IP addresses that computers actually use to find each other. When you buy a domain and point it at GitHub, you're adding an entry to that directory saying "when someone types this name, send them to GitHub's servers."
+
+Exercise: this one is just observational. Go to your GitHub Pages URL and look at it carefully. Notice the structure: username.github.io/repo-name. Now imagine what it would look like as a custom domain. Is that worth the annual cost for your use case? Probably not — but now you know it's possible and roughly how it works.`
+      }
+    ]
+  },
+  {
+    unit: "UNIT 3",
+    title: "What Netlify Is and Does",
+    subtitle: "A more powerful alternative to GitHub Pages",
+    accent: "#ff9f0a",
+    emoji: "⚡",
+    lessons: [
+      {
+        id: "3.1",
+        title: "Netlify vs. GitHub Pages",
+        duration: "9 min",
+        sub: "When to use which",
+        body: `GitHub Pages and Netlify both turn your code into a live website. The difference is in how much they do automatically, and what kinds of sites they can handle.
+
+GitHub Pages is intentionally simple. It takes static files — HTML, CSS, JavaScript — and serves them. No processing, no build steps, no server logic. That simplicity is a feature: there's nothing to configure, nothing to break, and it's free forever. For a single HTML file like your curriculum, GitHub Pages is the right tool.
+
+Netlify does everything GitHub Pages does, and more. It connects directly to your GitHub repository and deploys automatically on every commit — same as GitHub Pages. But it also handles build processes, meaning if your project needs to compile or transform files before being served, Netlify does that automatically. It has built-in form handling, authentication, serverless functions, and more detailed deployment controls.
+
+For most beginners with simple projects, GitHub Pages is sufficient and simpler. Netlify becomes the better choice when your project grows beyond a single static file — for example, if you start using a framework like React (which requires a build step to convert .jsx files into plain HTML and JavaScript that browsers can read) or if you need features like form submissions or user accounts.
+
+The reason Netlify is worth understanding even if you don't need it yet: it's the tool you'd reach for next if GitHub Pages ever felt limiting. Many professional developers use Netlify for production sites because of its reliability and feature set. Understanding what it's for — and the difference between static sites and ones that require a build process — gives you a mental framework for the web development landscape.
+
+Exercise: go to netlify.com and look at their homepage. Don't sign up yet — just read what they describe as their core features. Compare that list to what you know GitHub Pages does. Notice which features are additions versus which are the same.`
+      },
+      {
+        id: "3.2",
+        title: "Connecting Netlify to GitHub",
+        duration: "10 min",
+        sub: "The deploy pipeline explained",
+        body: `The most common Netlify workflow is: you write code, push it to GitHub, and Netlify automatically builds and deploys your site. You never touch Netlify directly after the initial setup — GitHub becomes your interface and Netlify does the deployment work in the background.
+
+Setting this up takes about five minutes. You create a Netlify account, click "Add new site," choose "Import an existing project," authorize Netlify to access your GitHub account, select the repository you want to deploy, configure any build settings if needed, and click deploy. Netlify then watches that repository — whenever you commit to the main branch, it automatically pulls the new code, runs any build steps, and updates your live site.
+
+The key concept here is the deploy pipeline. Every time you push a commit, Netlify runs through a sequence: it pulls your code, installs any dependencies, runs the build command if you have one, and then publishes the result to their CDN — Content Delivery Network, which means your site is served from servers close to wherever the visitor is located, making it fast everywhere.
+
+For a plain HTML file, the build step is essentially nothing — the file is already ready to serve. Where the pipeline becomes powerful is with frameworks. If your project were built in React, the build command would be npm run build, which converts all your .jsx files into optimized HTML and JavaScript. Netlify handles that automatically, which is why developers prefer it for anything beyond basic HTML.
+
+One Netlify feature worth knowing: deploy previews. Every time you open a pull request on GitHub — a proposed change to your code — Netlify automatically builds and deploys a preview of that version at a temporary URL. You can see exactly what your site will look like with that change before it goes live. For solo projects this is less essential, but it's a powerful quality-control mechanism.
+
+Exercise: if you want to try Netlify, sign up for a free account and connect it to your curriculum repository. Go through the setup steps and compare the resulting URL to your GitHub Pages URL. Both should serve the same content — observe the difference in deployment speed and the interface Netlify provides.`
+      },
+      {
+        id: "3.3",
+        title: "Netlify's Free Tier and Limits",
+        duration: "7 min",
+        sub: "What you get and where the walls are",
+        body: `Netlify's free tier — called the Starter plan — is genuinely generous for personal projects and small sites. Understanding what's included and where the limits are helps you make informed decisions about whether it's the right tool for a given project.
+
+On the free tier you get unlimited sites, which means you can connect as many GitHub repositories as you want and serve them all as separate Netlify deployments. You get 100 gigabytes of bandwidth per month, which is more than enough for a personal project that isn't serving large files to thousands of users. You get 300 build minutes per month, meaning Netlify will spend up to five hours per month building and deploying your sites — for simple HTML files this is essentially unlimited, since each deploy takes seconds.
+
+You also get a free netlify.app subdomain for each site, so your URL looks like random-words.netlify.app or you can set a custom name like your-project.netlify.app. Custom domains work the same as with GitHub Pages — you bring your own domain and point it at Netlify.
+
+Where the free tier ends: Netlify's serverless functions, called Netlify Functions, have a limit of 125,000 requests per month on free. Their identity and authentication features have user limits. Collaborative features — multiple team members, role-based access — require paid plans. None of this matters for a personal curriculum app, but it's useful to know that those features exist at the paid tier if you ever build something that needs them.
+
+The honest bottom line for your situation: GitHub Pages is free, simpler, and already working. Netlify's free tier adds no meaningful value for a single HTML file project. The reason to learn Netlify now is the same reason to learn branches in GitHub — it's the vocabulary and mental model you need when you inevitably build something more complex.
+
+Exercise: go to netlify.com/pricing and read the comparison between Starter and Pro. Identify three features in Pro that you don't understand yet. Write them down — those are your next learning targets when you're ready to go deeper.`
+      }
+    ]
+  },
+  {
+    unit: "UNIT 4",
+    title: "Putting It Together",
+    subtitle: "A repeatable workflow you can own",
+    accent: "#bf5af2",
+    emoji: "🔁",
+    lessons: [
+      {
+        id: "4.1",
+        title: "Your Current Workflow, Explained",
+        duration: "8 min",
+        sub: "What you've been doing and why it works",
+        body: `Let's map exactly what you've been doing against the concepts from the previous units, so you can see the full picture of what's happening at each step.
+
+When you went to github.com and created a repository named ai-curriculum, you created a project folder on GitHub's servers. That repository has a main branch — the primary, live version of your project.
+
+When you uploaded your HTML file and typed a commit message, you created the first commit in that repository's history. GitHub stored not just the file, but a snapshot of the entire repository at that moment, tagged with your message and the timestamp. The file now exists permanently on GitHub's servers.
+
+When you went to Settings and enabled GitHub Pages, you told GitHub to read the files in your main branch and serve them as a public website. GitHub allocated a subdomain — yourusername.github.io — and mapped your repository to a path under it. From that point, your HTML file is a live webpage accessible from any device.
+
+When you access that URL on your iPhone, Safari fetches the HTML file from GitHub's servers, reads the JavaScript inside it, and executes it locally on your phone. The localStorage calls in the JavaScript save your progress data to your phone's own storage — that's why progress persists when you reopen the page, as long as you're using the same browser on the same device.
+
+The reason it didn't work before you set up GitHub Pages — why you had to navigate through Claude conversations — was that the file had no stable URL. It existed only as a temporary artifact inside Claude's interface. GitHub Pages gave it a permanent address.
+
+Exercise: without looking anything up, write a plain-language explanation of what happens between you tapping the home screen icon and the curriculum appearing on screen. Try to name each step. Then compare your explanation to this lesson. Where were the gaps?`
+      },
+      {
+        id: "4.2",
+        title: "How to Update Your Curriculum",
+        duration: "9 min",
+        sub: "The edit-commit-deploy cycle",
+        body: `Now that you understand the infrastructure, here's the complete repeatable workflow for updating your curriculum app — adding new units, fixing content, or changing the design.
+
+Step one: get the updated HTML file. When you work with Claude to add content or make changes, ask for a complete updated HTML file as the output. Download it from the Claude artifact. This is your source of truth — the file that should go into GitHub.
+
+Step two: go to your GitHub repository. Navigate to github.com, find your ai-curriculum repository, and click on your HTML file to open it.
+
+Step three: replace the file. Click the edit button — the pencil icon. On a phone this can be fiddly; an alternative is to delete the old file and upload the new one. To delete, open the file, tap the three-dot menu, select Delete, and commit. Then use Add file → Upload files to upload your new version.
+
+Step four: commit with a message. Whatever path you take, write a specific commit message before you confirm. "Add units 9 and 10 with exercises" is better than "update."
+
+Step five: wait about sixty seconds. Check the Actions tab if you're unsure — a green checkmark means the deployment is done.
+
+Step six: open your live URL. Your home screen app will serve the updated version automatically. If you see the old version, close the tab completely and reopen.
+
+That's the full cycle. The friction point right now is step three — editing on mobile is awkward. If you find yourself doing this frequently, using GitHub on a computer for the editing step is significantly easier. The file upload approach works on phone but requires the delete-then-upload sequence.
+
+Exercise: practice the full cycle with a small change. Ask Claude to add one sentence anywhere in your curriculum HTML, download the file, replace it on GitHub, and confirm the live site updated. The goal is to own the workflow end to end without needing step-by-step guidance.`
+      },
+      {
+        id: "4.3",
+        title: "What to Learn Next",
+        duration: "11 min",
+        sub: "The natural progressions from here",
+        body: `You now have a working mental model of GitHub and Netlify. You understand repositories, commits, branches, GitHub Pages, and how Netlify fits in. More importantly, you understand why each piece exists — the problem it solves — which is more durable knowledge than memorizing steps.
+
+The natural next level, if you want to keep developing this capability, branches in three directions.
+
+The first direction is deeper GitHub fluency. This means getting comfortable with branches and pull requests as a real workflow, not just a concept. It means using the GitHub mobile app (which is much better for viewing and navigating repositories on your phone than the browser). It means understanding issues — GitHub's built-in task tracker — and using them to manage what you want to change or build next in your project.
+
+The second direction is light coding capability. You've seen HTML and JavaScript in your curriculum file. You don't need to understand all of it, but understanding the structure — what HTML does versus what JavaScript does, how CSS controls appearance, what localStorage is and how it works — would let you make small targeted edits directly rather than always relying on Claude to produce complete new files. This is a significant capability unlock. A few hours of focused learning on those three topics would get you there.
+
+The third direction is Netlify as a real deployment tool. If you ever build something that uses a framework — React, Vue, Svelte — Netlify becomes the natural home for it. The next step would be understanding what a build process is and why frameworks need one, which leads naturally to Node.js, npm, and the JavaScript ecosystem. This is the more technical path, but it's also where the most powerful tools live.
+
+None of these directions are urgent. Your current setup works, and working beats sophisticated. But knowing the map helps you choose where to invest when you're ready. The question to ask yourself is: what would I build if I had slightly more capability than I have now? The answer to that tells you which direction to go next.
+
+Exercise: write down one thing you wish your curriculum app did that it currently doesn't. Bring that to Claude and ask what it would take to build it — what concepts you'd need to understand, what the code change would look like. Use that as your compass for what to learn next.`
+      }
+    ]
+  }
+];
+
+// ── State ───────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'git-netlify-curriculum-completed';
+let completed = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+let activeUnit = 0;
+let activeLesson = 0;
+
+function saveCompleted() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...completed]));
+}
+
+const totalLessons = curriculum.reduce((s, u) => s + u.lessons.length, 0);
+const allLessonIds = curriculum.flatMap(u => u.lessons.map(l => l.id));
+
+// ── Build home ──────────────────────────────────────────────────────────────
+function buildHome() {
+  // Progress bar
+  const bar = document.getElementById('progress-bar');
+  bar.innerHTML = '';
+  curriculum.forEach(u => {
+    u.lessons.forEach(l => {
+      const seg = document.createElement('div');
+      seg.className = 'progress-seg';
+      seg.id = 'seg-' + l.id;
+      seg.style.background = completed.has(l.id) ? u.accent : '#e5e5ea';
+      bar.appendChild(seg);
+    });
+  });
+
+  document.getElementById('progress-badge').textContent =
+    `${completed.size} / ${totalLessons}`;
+
+  const container = document.getElementById('units-container');
+  container.innerHTML = '';
+
+  curriculum.forEach((u, ui) => {
+    const doneCount = u.lessons.filter(l => completed.has(l.id)).length;
+
+    const section = document.createElement('div');
+
+    const secHeader = document.createElement('div');
+    secHeader.className = 'section-header';
+    secHeader.innerHTML = `
+      <div class="section-title" style="color:${u.accent}">${u.title}</div>
+      <div class="section-meta">${doneCount}/${u.lessons.length}</div>
+    `;
+    section.appendChild(secHeader);
+
+    const secSub = document.createElement('div');
+    secSub.className = 'section-sub';
+    secSub.textContent = u.subtitle;
+    section.appendChild(secSub);
+
+    const group = document.createElement('div');
+    group.className = 'lessons-group';
+
+    u.lessons.forEach((l, li) => {
+      const row = document.createElement('div');
+      row.className = 'lesson-row' + (completed.has(l.id) ? ' done' : '');
+      row.id = 'row-' + l.id;
+
+      row.innerHTML = `
+        <div class="lesson-icon" style="background:${u.accent}22">
+          <span>${u.emoji}</span>
+        </div>
+        <div class="lesson-info">
+          <div class="lesson-title${completed.has(l.id) ? ' done' : ''}" id="name-${l.id}">${l.title}</div>
+          <div class="lesson-sub">${l.sub}</div>
+        </div>
+        <div class="lesson-right">
+          <div class="lesson-dur">${l.duration}</div>
+          <div class="checkmark${completed.has(l.id) ? ' done' : ''}">✓</div>
+        </div>
+      `;
+      row.onclick = () => openLesson(ui, li);
+      group.appendChild(row);
+    });
+
+    section.appendChild(group);
+    container.appendChild(section);
+  });
+}
+
+function updateHomeProgress() {
+  document.getElementById('progress-badge').textContent =
+    `${completed.size} / ${totalLessons}`;
+  curriculum.forEach(u => {
+    u.lessons.forEach(l => {
+      const seg = document.getElementById('seg-' + l.id);
+      if (seg) seg.style.background = completed.has(l.id) ? u.accent : '#e5e5ea';
+      const row = document.getElementById('row-' + l.id);
+      if (row) row.className = 'lesson-row' + (completed.has(l.id) ? ' done' : '');
+      const name = document.getElementById('name-' + l.id);
+      if (name) name.className = 'lesson-title' + (completed.has(l.id) ? ' done' : '');
+    });
+  });
+}
+
+// ── Lesson view ─────────────────────────────────────────────────────────────
+function openLesson(ui, li) {
+  activeUnit = ui;
+  activeLesson = li;
+  renderLesson();
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('lesson-view').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function renderLesson() {
+  const u = curriculum[activeUnit];
+  const l = u.lessons[activeLesson];
+
+  // Header
+  document.getElementById('lv-label').textContent = u.unit;
+  document.getElementById('lv-label').style.color = u.accent;
+  document.getElementById('lv-title').textContent = l.title;
+
+  // Stats
+  document.getElementById('lv-unit-num').textContent = u.unit.replace('UNIT ', '') + ' of ' + curriculum.length;
+  document.getElementById('lv-dur').textContent = l.duration;
+  const lessonIndex = allLessonIds.indexOf(l.id) + 1;
+  document.getElementById('lv-progress').textContent = lessonIndex + ' / ' + totalLessons;
+
+  // Body
+  document.getElementById('lv-body').textContent = l.body;
+
+  // Copy btn reset
+  const copyBtn = document.getElementById('copy-btn');
+  copyBtn.textContent = 'Copy for Speechify';
+  copyBtn.className = 'copy-btn';
+  copyBtn.style.background = '#1c1c1e';
+  copyBtn.dataset.accent = u.accent;
+
+  // Complete btn
+  const done = completed.has(l.id);
+  const cb = document.getElementById('complete-btn');
+  cb.textContent = done ? '✓ Complete' : 'Mark Complete';
+  cb.className = 'complete-btn' + (done ? ' done' : '');
+
+  // Nav
+  const hasPrev = activeLesson > 0 || activeUnit > 0;
+  const hasNext = activeLesson < u.lessons.length - 1 || activeUnit < curriculum.length - 1;
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  prevBtn.style.display = hasPrev ? '' : 'none';
+  nextBtn.style.display = hasNext ? '' : 'none';
+  if (!hasPrev && !hasNext) prevBtn.style.display = '';
+}
+
+function goHome() {
+  document.getElementById('lesson-view').style.display = 'none';
+  document.getElementById('home').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function goNext() {
+  const u = curriculum[activeUnit];
+  if (activeLesson < u.lessons.length - 1) { activeLesson++; }
+  else if (activeUnit < curriculum.length - 1) { activeUnit++; activeLesson = 0; }
+  renderLesson();
+  window.scrollTo(0, 0);
+}
+
+function goPrev() {
+  if (activeLesson > 0) { activeLesson--; }
+  else if (activeUnit > 0) {
+    activeUnit--;
+    activeLesson = curriculum[activeUnit].lessons.length - 1;
+  }
+  renderLesson();
+  window.scrollTo(0, 0);
+}
+
+function toggleComplete() {
+  const l = curriculum[activeUnit].lessons[activeLesson];
+  completed.has(l.id) ? completed.delete(l.id) : completed.add(l.id);
+  saveCompleted();
+  renderLesson();
+  updateHomeProgress();
+}
+
+function copyLesson() {
+  const l = curriculum[activeUnit].lessons[activeLesson];
+  const text = l.title + '\n\n' + l.body;
+  const btn = document.getElementById('copy-btn');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!';
+    btn.style.background = '#30d158';
+    setTimeout(() => {
+      btn.textContent = 'Copy for Speechify';
+      btn.style.background = '#1c1c1e';
+    }, 2000);
+  });
+}
+
+// ── Init ────────────────────────────────────────────────────────────────────
+buildHome();
+</script>
+</body>
+</html>
